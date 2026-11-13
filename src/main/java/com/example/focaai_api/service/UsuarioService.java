@@ -1,6 +1,7 @@
 package com.example.focaai_api.service;
 
 import com.example.focaai_api.dto.CadastroUsuarioRequest;
+import com.example.focaai_api.dto.AlterarSenhaRequest;
 import com.example.focaai_api.dto.ExcluirContaRequest;
 import com.example.focaai_api.dto.LoginRequest;
 import com.example.focaai_api.dto.UsuarioResponse;
@@ -88,6 +89,41 @@ public class UsuarioService {
                 usuario.getNome(),
                 usuario.getEmail()
         );
+    }
+
+    @Transactional
+    public void alterarSenha(AlterarSenhaRequest request) {
+
+        String email = request.email().trim().toLowerCase(Locale.ROOT);
+
+        Usuario usuario = usuarioRepository
+                .findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "E-mail ou senha atual inválidos."
+                ));
+
+        boolean senhaAtualCorreta = passwordEncoder.matches(
+                request.senhaAtual(),
+                usuario.getSenha()
+        );
+
+        if (!senhaAtualCorreta) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "E-mail ou senha atual inválidos."
+            );
+        }
+
+        if (passwordEncoder.matches(request.novaSenha(), usuario.getSenha())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A nova senha deve ser diferente da senha atual."
+            );
+        }
+
+        usuario.setSenha(passwordEncoder.encode(request.novaSenha()));
+        usuarioRepository.save(usuario);
     }
 
     @Transactional

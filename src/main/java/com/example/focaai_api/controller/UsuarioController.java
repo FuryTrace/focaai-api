@@ -1,6 +1,7 @@
 package com.example.focaai_api.controller;
 
 import com.example.focaai_api.dto.CadastroUsuarioRequest;
+import com.example.focaai_api.dto.AlterarSenhaRequest;
 import com.example.focaai_api.dto.ExcluirContaRequest;
 import com.example.focaai_api.dto.LoginRequest;
 import com.example.focaai_api.dto.UsuarioResponse;
@@ -38,6 +39,15 @@ public class UsuarioController {
         UsuarioResponse resposta = usuarioService.login(request);
 
         return ResponseEntity.ok(resposta);
+    }
+
+    @PutMapping("/alterar-senha")
+    public ResponseEntity<Void> alterarSenha(
+            @Valid @RequestBody AlterarSenhaRequest request) {
+
+        usuarioService.alterarSenha(request);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/excluir")
